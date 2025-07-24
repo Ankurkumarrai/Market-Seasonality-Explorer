@@ -48,7 +48,7 @@ Market-Seasonality-Explorer-main/
 
 ---
 
-## 🧪 Installation & Running Instructions
+##  Installation & Running Instructions
 
 ### 1. Clone the repo
 ```bash
