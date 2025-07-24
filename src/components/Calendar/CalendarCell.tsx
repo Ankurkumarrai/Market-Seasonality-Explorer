@@ -1,15 +1,36 @@
 import { TrendingUp, TrendingDown, Minus, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const CalendarCell = ({ date, isCurrentMonth, data, onSelect, isSelected, view }) => {
+const CalendarCell = ({ date, isCurrentMonth, data, onSelect, isSelected, isInRange, isRangeStart, isRangeEnd, view, colorScheme = 'default' }) => {
   const today = new Date();
   const isToday = date.toDateString() === today.toDateString();
 
   const getVolatilityColor = (volatility) => {
     if (!volatility) return 'bg-calendar-cell';
-    if (volatility < 0.02) return 'bg-volatility-low/20 border-volatility-low/50';
-    if (volatility < 0.05) return 'bg-volatility-medium/20 border-volatility-medium/50';
-    return 'bg-volatility-high/20 border-volatility-high/50';
+    
+    const baseClasses = {
+      'default': {
+        low: 'bg-volatility-low/20 border-volatility-low/50',
+        medium: 'bg-volatility-medium/20 border-volatility-medium/50',
+        high: 'bg-volatility-high/20 border-volatility-high/50'
+      },
+      'high-contrast': {
+        low: 'bg-green-900/40 border-green-400/80',
+        medium: 'bg-yellow-900/40 border-yellow-400/80',
+        high: 'bg-red-900/40 border-red-400/80'
+      },
+      'colorblind': {
+        low: 'bg-blue-900/20 border-blue-400/50',
+        medium: 'bg-orange-900/20 border-orange-400/50',
+        high: 'bg-purple-900/20 border-purple-400/50'
+      }
+    };
+    
+    const scheme = baseClasses[colorScheme] || baseClasses['default'];
+    
+    if (volatility < 0.02) return scheme.low;
+    if (volatility < 0.05) return scheme.medium;
+    return scheme.high;
   };
 
   const getPerformanceIcon = (change) => {
@@ -42,14 +63,17 @@ const CalendarCell = ({ date, isCurrentMonth, data, onSelect, isSelected, view }
   return (
     <div
       className={cn(
-        'relative h-20 p-2 rounded-lg border cursor-pointer transition-all duration-300',
+        'relative h-20 p-2 rounded-lg border cursor-pointer transition-all duration-300 transform hover:scale-105',
         'hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20',
         'focus:outline-none focus:ring-2 focus:ring-primary/50',
         getVolatilityColor(data?.volatility),
-        isSelected && 'ring-2 ring-primary border-primary',
+        isSelected && 'ring-2 ring-primary border-primary scale-105',
+        isInRange && 'bg-primary/10 border-primary/30',
+        isRangeStart && 'bg-primary/20 border-primary rounded-l-lg',
+        isRangeEnd && 'bg-primary/20 border-primary rounded-r-lg',
         isToday && 'ring-1 ring-accent border-accent',
         !isCurrentMonth && 'opacity-40',
-        'group'
+        'group animate-fade-in'
       )}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
@@ -119,16 +143,66 @@ const CalendarCell = ({ date, isCurrentMonth, data, onSelect, isSelected, view }
         <div className="absolute inset-0 bg-primary/10 rounded-lg animate-pulse" />
       )}
 
-      {/* Hover Tooltip Preview */}
+      {/* Enhanced Hover Tooltip */}
       {data && (
         <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full
-                        opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                        bg-card border border-border rounded p-2 text-xs whitespace-nowrap z-10
-                        shadow-lg">
-          <div>Vol: {(data.volatility * 100).toFixed(1)}%</div>
-          <div>Price: {data.priceChange > 0 ? '+' : ''}{(data.priceChange * 100).toFixed(2)}%</div>
-          {data.volume && <div>Vol: {(data.volume / 1000000).toFixed(1)}M</div>}
+                        opacity-0 group-hover:opacity-100 transition-all duration-300 scale-95 group-hover:scale-100
+                        bg-card border border-border rounded-lg p-3 text-xs whitespace-nowrap z-20
+                        shadow-xl min-w-[200px]">
+          <div className="font-semibold text-foreground mb-2">{date.toLocaleDateString()}</div>
+          <div className="space-y-1">
+            <div className="flex justify-between">
+              <span>Volatility:</span>
+              <span className={cn(
+                'font-medium',
+                data.volatility < 0.02 ? 'text-green-500' : 
+                data.volatility < 0.05 ? 'text-yellow-500' : 'text-red-500'
+              )}>
+                {(data.volatility * 100).toFixed(1)}%
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Price Change:</span>
+              <span className={cn(
+                'font-medium',
+                data.priceChange > 0 ? 'text-performance-positive' : 'text-performance-negative'
+              )}>
+                {data.priceChange > 0 ? '+' : ''}{(data.priceChange * 100).toFixed(2)}%
+              </span>
+            </div>
+            {data.volume && (
+              <div className="flex justify-between">
+                <span>Volume:</span>
+                <span className="font-medium">{(data.volume / 1000000).toFixed(1)}M</span>
+              </div>
+            )}
+            {data.rsi && (
+              <div className="flex justify-between">
+                <span>RSI:</span>
+                <span className="font-medium">{data.rsi.toFixed(1)}</span>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <span>OHLC:</span>
+              <span className="font-medium text-xs">
+                {data.open?.toFixed(2)} / {data.high?.toFixed(2)} / {data.low?.toFixed(2)} / {data.close?.toFixed(2)}
+              </span>
+            </div>
+          </div>
         </div>
+      )}
+
+      {/* Range Selection Indicators */}
+      {isInRange && (
+        <div className="absolute inset-0 bg-primary/5 border border-primary/20 rounded-lg pointer-events-none" />
+      )}
+      
+      {isRangeStart && (
+        <div className="absolute top-1 left-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
+      )}
+      
+      {isRangeEnd && (
+        <div className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
       )}
     </div>
   );

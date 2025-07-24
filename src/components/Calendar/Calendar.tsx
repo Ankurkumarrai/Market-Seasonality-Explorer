@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import CalendarCell from './CalendarCell';
 import { generateCalendarData } from '@/utils/marketData';
 
-const Calendar = ({ view, selectedDate, onDateSelect, selectedInstrument }) => {
+const Calendar = ({ view, selectedDate, selectedDateRange, onDateSelect, onDateRangeSelect, selectedInstrument, colorScheme = 'default', zoomLevel = 1 }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarData, setCalendarData] = useState({});
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [selectionStart, setSelectionStart] = useState(null);
 
   useEffect(() => {
     // Generate market data for current view
@@ -32,6 +34,34 @@ const Calendar = ({ view, selectedDate, onDateSelect, selectedInstrument }) => {
 
   const goToToday = () => {
     setCurrentDate(new Date());
+    onDateSelect(new Date());
+  };
+
+  const handleDateClick = (date) => {
+    if (!isSelecting) {
+      onDateSelect(date);
+      setSelectionStart(date);
+      setIsSelecting(true);
+    } else {
+      const start = selectionStart < date ? selectionStart : date;
+      const end = selectionStart < date ? date : selectionStart;
+      onDateRangeSelect({ start, end });
+      setIsSelecting(false);
+      setSelectionStart(null);
+    }
+  };
+
+  const isDateInRange = (date) => {
+    if (!selectedDateRange) return false;
+    return date >= selectedDateRange.start && date <= selectedDateRange.end;
+  };
+
+  const isDateRangeStart = (date) => {
+    return selectedDateRange && date.getTime() === selectedDateRange.start.getTime();
+  };
+
+  const isDateRangeEnd = (date) => {
+    return selectedDateRange && date.getTime() === selectedDateRange.end.getTime();
   };
 
   const renderCalendarHeader = () => {
@@ -130,9 +160,13 @@ const Calendar = ({ view, selectedDate, onDateSelect, selectedInstrument }) => {
           date={prevMonthDay}
           isCurrentMonth={false}
           data={calendarData[prevMonthDay.toDateString()]}
-          onSelect={onDateSelect}
+          onSelect={handleDateClick}
           isSelected={selectedDate && selectedDate.toDateString() === prevMonthDay.toDateString()}
+          isInRange={isDateInRange(prevMonthDay)}
+          isRangeStart={isDateRangeStart(prevMonthDay)}
+          isRangeEnd={isDateRangeEnd(prevMonthDay)}
           view={view}
+          colorScheme={colorScheme}
         />
       );
     }
@@ -146,9 +180,13 @@ const Calendar = ({ view, selectedDate, onDateSelect, selectedInstrument }) => {
           date={cellDate}
           isCurrentMonth={true}
           data={calendarData[cellDate.toDateString()]}
-          onSelect={onDateSelect}
+          onSelect={handleDateClick}
           isSelected={selectedDate && selectedDate.toDateString() === cellDate.toDateString()}
+          isInRange={isDateInRange(cellDate)}
+          isRangeStart={isDateRangeStart(cellDate)}
+          isRangeEnd={isDateRangeEnd(cellDate)}
           view={view}
+          colorScheme={colorScheme}
         />
       );
     }
@@ -163,9 +201,13 @@ const Calendar = ({ view, selectedDate, onDateSelect, selectedInstrument }) => {
           date={nextMonthDay}
           isCurrentMonth={false}
           data={calendarData[nextMonthDay.toDateString()]}
-          onSelect={onDateSelect}
+          onSelect={handleDateClick}
           isSelected={selectedDate && selectedDate.toDateString() === nextMonthDay.toDateString()}
+          isInRange={isDateInRange(nextMonthDay)}
+          isRangeStart={isDateRangeStart(nextMonthDay)}
+          isRangeEnd={isDateRangeEnd(nextMonthDay)}
           view={view}
+          colorScheme={colorScheme}
         />
       );
     }
@@ -178,10 +220,28 @@ const Calendar = ({ view, selectedDate, onDateSelect, selectedInstrument }) => {
   };
 
   return (
-    <div className="bg-calendar-bg p-6 rounded-lg border border-border">
+    <div className={`bg-calendar-bg p-6 rounded-lg border border-border transition-all duration-300 ${colorScheme === 'high-contrast' ? 'contrast-more' : ''} ${colorScheme === 'colorblind' ? 'colorblind-friendly' : ''}`}>
       {renderCalendarHeader()}
       {renderDaysOfWeek()}
       {renderCalendarGrid()}
+      
+      {/* Range Selection Helper */}
+      {isSelecting && selectionStart && (
+        <div className="mt-4 p-3 bg-muted rounded-lg border border-border">
+          <p className="text-sm text-muted-foreground">
+            Click another date to select a range starting from {selectionStart.toLocaleDateString()}
+          </p>
+          <button 
+            onClick={() => {
+              setIsSelecting(false);
+              setSelectionStart(null);
+            }}
+            className="text-xs text-primary hover:underline mt-1"
+          >
+            Cancel selection
+          </button>
+        </div>
+      )}
     </div>
   );
 };
