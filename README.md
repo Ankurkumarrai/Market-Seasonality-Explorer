@@ -74,7 +74,7 @@ npm run dev
 bun run dev
 ```
 
-The app will be available at: Ex :  [http://localhost:5173](http://localhost:5173)
+The app will be available at: [Ex :  [http://localhost:5173](http://localhost:5173)](http://localhost:8080/)
 
 ---
 
