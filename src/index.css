@@ -2,41 +2,83 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Market Seasonality Explorer Design System - Professional Trading Interface */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Trading Interface Colors */
+    --background: 220 20% 7%;
+    --foreground: 210 10% 95%;
+    
+    /* Market Colors */
+    --bull-green: 152 69% 45%;
+    --bear-red: 0 70% 58%;
+    --neutral-gray: 210 15% 55%;
+    
+    /* Calendar & Data Visualization */
+    --calendar-bg: 220 18% 10%;
+    --calendar-cell: 220 15% 12%;
+    --calendar-hover: 220 15% 15%;
+    --calendar-selected: 210 90% 50%;
+    
+    /* Volatility Heatmap */
+    --volatility-low: 152 69% 25%;
+    --volatility-medium: 45 95% 45%;
+    --volatility-high: 0 70% 45%;
+    
+    /* Performance Indicators */
+    --performance-positive: 152 69% 35%;
+    --performance-negative: 0 70% 48%;
+    --performance-neutral: 210 15% 45%;
+    
+    /* Professional UI */
+    --primary: 210 90% 55%;
+    --primary-hover: 210 90% 60%;
+    --secondary: 220 15% 18%;
+    --accent: 45 95% 55%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(210 90% 55%), hsl(210 90% 40%));
+    --gradient-bull: linear-gradient(135deg, hsl(152 69% 45%), hsl(152 69% 35%));
+    --gradient-bear: linear-gradient(135deg, hsl(0 70% 58%), hsl(0 70% 48%));
+    --gradient-volatility: linear-gradient(90deg, hsl(152 69% 25%), hsl(45 95% 45%), hsl(0 70% 45%));
+    
+    /* Shadows & Effects */
+    --shadow-trading: 0 4px 20px hsla(220 20% 5% / 0.8);
+    --shadow-hover: 0 8px 30px hsla(210 90% 55% / 0.2);
+    --glow-trading: 0 0 20px hsla(210 90% 55% / 0.3);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s ease-out;
+    
+    /* Standard UI tokens updated for trading theme */
+    --card: var(--calendar-cell);
+    --card-foreground: var(--foreground);
+    
+    --popover: var(--calendar-bg);
+    --popover-foreground: var(--foreground);
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --primary: var(--primary);
+    --primary-foreground: var(--background);
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --secondary: var(--secondary);
+    --secondary-foreground: var(--foreground);
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --muted: 220 15% 20%;
+    --muted-foreground: var(--neutral-gray);
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --accent: var(--accent);
+    --accent-foreground: var(--background);
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --destructive: var(--bear-red);
+    --destructive-foreground: var(--foreground);
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --border: 220 15% 25%;
+    --input: 220 15% 15%;
+    --ring: var(--primary);
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +142,49 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  
+  /* Custom scrollbar for trading interface */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--calendar-bg));
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary));
+  }
+}
+
+@layer components {
+  /* Trading specific utilities */
+  .trading-glow {
+    box-shadow: var(--glow-trading);
+  }
+  
+  .transition-trading {
+    transition: var(--transition-smooth);
+  }
+  
+  .bg-gradient-trading {
+    background: var(--gradient-primary);
+  }
+  
+  .bg-gradient-bull {
+    background: var(--gradient-bull);
+  }
+  
+  .bg-gradient-bear {
+    background: var(--gradient-bear);
   }
 }
